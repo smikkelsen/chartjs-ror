@@ -1,7 +1,7 @@
 /*!
  * Chart.js
  * http://chartjs.org/
- * Version: 1.0.1
+ * Version: 1.0.2
  *
  * Copyright 2015 Nick Downie
  * Released under the MIT license
@@ -25,6 +25,25 @@
 		this.ctx = context;
 
 		//Variables global to the chart
+		var computeDimension = function(element,dimension)
+		{
+			if (element['offset'+dimension])
+			{
+				return element['offset'+dimension];
+			}
+			else
+			{
+				return document.defaultView.getComputedStyle(element).getPropertyValue(dimension);
+			}
+		}
+
+		var width = this.width = computeDimension(context.canvas,'Width');
+		var height = this.height = computeDimension(context.canvas,'Height');
+
+		// Firefox requires this to work correctly
+		context.canvas.width  = width;
+		context.canvas.height = height;
+
 		var width = this.width = context.canvas.width;
 		var height = this.height = context.canvas.height;
 		this.aspectRatio = this.width / this.height;
@@ -170,7 +189,7 @@
 	//Global Chart helpers object for utility methods and classes
 	var helpers = Chart.helpers = {};
 
-		//-- Basic js utility methods
+	//-- Basic js utility methods
 	var each = helpers.each = function(loopable,callback,self){
 			var additionalArgs = Array.prototype.slice.call(arguments, 3);
 			// Check to see if null or undefined firstly.
@@ -284,7 +303,7 @@
 			if (window.console && typeof window.console.warn == "function") console.warn(str);
 		},
 		amd = helpers.amd = (typeof define == 'function' && define.amd),
-		//-- Math methods
+	//-- Math methods
 		isNumber = helpers.isNumber = function(n){
 			return !isNaN(parseFloat(n)) && isFinite(n);
 		},
@@ -318,7 +337,7 @@
 		toRadians = helpers.radians = function(degrees){
 			return degrees * (Math.PI/180);
 		},
-		// Gets the angle from vertical upright to the point about a centre.
+	// Gets the angle from vertical upright to the point about a centre.
 		getAngleFromPoint = helpers.getAngleFromPoint = function(centrePoint, anglePoint){
 			var distanceFromXCenter = anglePoint.x - centrePoint.x,
 				distanceFromYCenter = anglePoint.y - centrePoint.y,
@@ -439,51 +458,51 @@
 			};
 
 		},
-		/* jshint ignore:start */
-		// Blows up jshint errors based on the new Function constructor
-		//Templating methods
-		//Javascript micro templating by John Resig - source at http://ejohn.org/blog/javascript-micro-templating/
+	/* jshint ignore:start */
+	// Blows up jshint errors based on the new Function constructor
+	//Templating methods
+	//Javascript micro templating by John Resig - source at http://ejohn.org/blog/javascript-micro-templating/
 		template = helpers.template = function(templateString, valuesObject){
 
 			// If templateString is function rather than string-template - call the function for valuesObject
 
 			if(templateString instanceof Function){
-			 	return templateString(valuesObject);
-		 	}
+				return templateString(valuesObject);
+			}
 
 			var cache = {};
 			function tmpl(str, data){
 				// Figure out if we're getting a template, or if we need to
 				// load the template - and be sure to cache the result.
 				var fn = !/\W/.test(str) ?
-				cache[str] = cache[str] :
+					cache[str] = cache[str] :
 
-				// Generate a reusable function that will serve as a template
-				// generator (and which will be cached).
-				new Function("obj",
-					"var p=[],print=function(){p.push.apply(p,arguments);};" +
+					// Generate a reusable function that will serve as a template
+					// generator (and which will be cached).
+					new Function("obj",
+						"var p=[],print=function(){p.push.apply(p,arguments);};" +
 
-					// Introduce the data as local variables using with(){}
-					"with(obj){p.push('" +
+							// Introduce the data as local variables using with(){}
+						"with(obj){p.push('" +
 
-					// Convert the template into pure JavaScript
-					str
-						.replace(/[\r\t\n]/g, " ")
-						.split("<%").join("\t")
-						.replace(/((^|%>)[^\t]*)'/g, "$1\r")
-						.replace(/\t=(.*?)%>/g, "',$1,'")
-						.split("\t").join("');")
-						.split("%>").join("p.push('")
-						.split("\r").join("\\'") +
-					"');}return p.join('');"
-				);
+							// Convert the template into pure JavaScript
+						str
+							.replace(/[\r\t\n]/g, " ")
+							.split("<%").join("\t")
+							.replace(/((^|%>)[^\t]*)'/g, "$1\r")
+							.replace(/\t=(.*?)%>/g, "',$1,'")
+							.split("\t").join("');")
+							.split("%>").join("p.push('")
+							.split("\r").join("\\'") +
+						"');}return p.join('');"
+					);
 
 				// Provide some basic currying to the user
 				return data ? fn( data ) : fn;
 			}
 			return tmpl(templateString,valuesObject);
 		},
-		/* jshint ignore:end */
+	/* jshint ignore:end */
 		generateLabels = helpers.generateLabels = function(templateString,numberOfSteps,graphMin,stepValue){
 			var labelsArray = new Array(numberOfSteps);
 			if (labelTemplateString){
@@ -493,9 +512,9 @@
 			}
 			return labelsArray;
 		},
-		//--Animation methods
-		//Easing functions adapted from Robert Penner's easing equations
-		//http://www.robertpenner.com/easing/
+	//--Animation methods
+	//Easing functions adapted from Robert Penner's easing equations
+	//http://www.robertpenner.com/easing/
 		easingEffects = helpers.easingEffects = {
 			linear: function (t) {
 				return t;
@@ -644,7 +663,7 @@
 				return easingEffects.easeOutBounce(t * 2 - 1) * 0.5 + 1 * 0.5;
 			}
 		},
-		//Request animation polyfill - http://www.paulirish.com/2011/requestanimationframe-for-smart-animating/
+	//Request animation polyfill - http://www.paulirish.com/2011/requestanimationframe-for-smart-animating/
 		requestAnimFrame = helpers.requestAnimFrame = (function(){
 			return window.requestAnimationFrame ||
 				window.webkitRequestAnimationFrame ||
@@ -685,7 +704,7 @@
 			};
 			requestAnimFrame(animationFrame);
 		},
-		//-- DOM methods
+	//-- DOM methods
 		getRelativePosition = helpers.getRelativePosition = function(evt){
 			var mouseX, mouseY;
 			var e = evt.originalEvent || evt,
@@ -766,7 +785,7 @@
 				ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 			}
 		},
-		//-- Canvas methods
+	//-- Canvas methods
 		clear = helpers.clear = function(chart){
 			chart.ctx.clearRect(0,0,chart.width,chart.height);
 		},
@@ -825,7 +844,7 @@
 		},
 		stop : function(){
 			// Stops any current animation loop occuring
-			helpers.cancelAnimFrame.call(root, this.animationFrame);
+			cancelAnimFrame(this.animationFrame);
 			return this;
 		},
 		resize : function(callback){
@@ -1304,35 +1323,35 @@
 			else{
 				switch(this.yAlign)
 				{
-				case "above":
-					//Draw a caret above the x/y
-					ctx.beginPath();
-					ctx.moveTo(this.x,this.y - caretPadding);
-					ctx.lineTo(this.x + this.caretHeight, this.y - (caretPadding + this.caretHeight));
-					ctx.lineTo(this.x - this.caretHeight, this.y - (caretPadding + this.caretHeight));
-					ctx.closePath();
-					ctx.fill();
-					break;
-				case "below":
-					tooltipY = this.y + caretPadding + this.caretHeight;
-					//Draw a caret below the x/y
-					ctx.beginPath();
-					ctx.moveTo(this.x, this.y + caretPadding);
-					ctx.lineTo(this.x + this.caretHeight, this.y + caretPadding + this.caretHeight);
-					ctx.lineTo(this.x - this.caretHeight, this.y + caretPadding + this.caretHeight);
-					ctx.closePath();
-					ctx.fill();
-					break;
+					case "above":
+						//Draw a caret above the x/y
+						ctx.beginPath();
+						ctx.moveTo(this.x,this.y - caretPadding);
+						ctx.lineTo(this.x + this.caretHeight, this.y - (caretPadding + this.caretHeight));
+						ctx.lineTo(this.x - this.caretHeight, this.y - (caretPadding + this.caretHeight));
+						ctx.closePath();
+						ctx.fill();
+						break;
+					case "below":
+						tooltipY = this.y + caretPadding + this.caretHeight;
+						//Draw a caret below the x/y
+						ctx.beginPath();
+						ctx.moveTo(this.x, this.y + caretPadding);
+						ctx.lineTo(this.x + this.caretHeight, this.y + caretPadding + this.caretHeight);
+						ctx.lineTo(this.x - this.caretHeight, this.y + caretPadding + this.caretHeight);
+						ctx.closePath();
+						ctx.fill();
+						break;
 				}
 
 				switch(this.xAlign)
 				{
-				case "left":
-					tooltipX = this.x - tooltipWidth + (this.cornerRadius + this.caretHeight);
-					break;
-				case "right":
-					tooltipX = this.x - (this.cornerRadius + this.caretHeight);
-					break;
+					case "left":
+						tooltipX = this.x - tooltipWidth + (this.cornerRadius + this.caretHeight);
+						break;
+					case "right":
+						tooltipX = this.x - (this.cornerRadius + this.caretHeight);
+						break;
 				}
 
 				drawRoundedRectangle(ctx,tooltipX,tooltipY,tooltipWidth,tooltipRectHeight,this.cornerRadius);
@@ -1358,7 +1377,7 @@
 			this.ctx.font = this.titleFont;
 
 			var titleWidth = this.ctx.measureText(this.title).width,
-				//Label has a legend square as well so account for this.
+			//Label has a legend square as well so account for this.
 				labelWidth = longestText(this.ctx,this.font,this.labels) + this.fontSize + 3,
 				longestTextWidth = max([labelWidth,titleWidth]);
 
@@ -1368,7 +1387,6 @@
 			var halfHeight = this.height/2;
 
 			//Check to ensure the height will fit on the canvas
-			//The three is to buffer form the very
 			if (this.y - halfHeight < 0 ){
 				this.y = halfHeight;
 			} else if (this.y + halfHeight > this.chart.height){
@@ -1480,10 +1498,10 @@
 			/*
 			 *	This sets what is returned from calculateScaleRange as static properties of this class:
 			 *
-				this.steps;
-				this.stepValue;
-				this.min;
-				this.max;
+			 this.steps;
+			 this.stepValue;
+			 this.min;
+			 this.max;
 			 *
 			 */
 			this.calculateYRange(cachedHeight);
@@ -1573,9 +1591,9 @@
 		},
 		calculateX : function(index){
 			var isRotated = (this.xLabelRotation > 0),
-				// innerWidth = (this.offsetGridLines) ? this.width - offsetLeft - this.padding : this.width - (offsetLeft + halfLabelWidth * 2) - this.padding,
+			// innerWidth = (this.offsetGridLines) ? this.width - offsetLeft - this.padding : this.width - (offsetLeft + halfLabelWidth * 2) - this.padding,
 				innerWidth = this.width - (this.xScalePaddingLeft + this.xScalePaddingRight),
-				valueWidth = innerWidth/(this.valuesCount - ((this.offsetGridLines) ? 0 : 1)),
+				valueWidth = innerWidth/Math.max((this.valuesCount - ((this.offsetGridLines) ? 0 : 1)), 1),
 				valueOffset = (valueWidth * index) + this.xScalePaddingLeft;
 
 			if (this.offsetGridLines){
@@ -1646,7 +1664,7 @@
 
 				each(this.xLabels,function(label,index){
 					var xPos = this.calculateX(index) + aliasPixel(this.lineWidth),
-						// Check to see if line/bar here and decide where to place the line
+					// Check to see if line/bar here and decide where to place the line
 						linePos = this.calculateX(index - (this.offsetGridLines ? 0.5 : 0)) + aliasPixel(this.lineWidth),
 						isRotated = (this.xLabelRotation > 0),
 						drawVerticalLine = this.showVerticalLines;
@@ -2310,7 +2328,7 @@
 
 	var root = this,
 		Chart = root.Chart,
-		//Cache a local reference to Chart.helpers
+	//Cache a local reference to Chart.helpers
 		helpers = Chart.helpers;
 
 	var defaultConfig = {
@@ -2416,12 +2434,12 @@
 			}
 		},
 		calculateCircumference : function(value){
-			return (Math.PI*2)*(value / this.total);
+			return (Math.PI*2)*(Math.abs(value) / this.total);
 		},
 		calculateTotal : function(data){
 			this.total = 0;
 			helpers.each(data,function(segment){
-				this.total += segment.value;
+				this.total += Math.abs(segment.value);
 			},this);
 		},
 		update : function(){
@@ -2751,14 +2769,14 @@
 
 			// Some helper methods for getting the next/prev points
 			var hasValue = function(item){
-				return item.value !== null;
-			},
-			nextPoint = function(point, collection, index){
-				return helpers.findNextWhere(collection, hasValue, index) || point;
-			},
-			previousPoint = function(point, collection, index){
-				return helpers.findPreviousWhere(collection, hasValue, index) || point;
-			};
+					return item.value !== null;
+				},
+				nextPoint = function(point, collection, index){
+					return helpers.findNextWhere(collection, hasValue, index) || point;
+				},
+				previousPoint = function(point, collection, index){
+					return helpers.findPreviousWhere(collection, hasValue, index) || point;
+				};
 
 			this.scale.draw(easingDecimal);
 
@@ -2869,7 +2887,7 @@
 
 	var root = this,
 		Chart = root.Chart,
-		//Cache a local reference to Chart.helpers
+	//Cache a local reference to Chart.helpers
 		helpers = Chart.helpers;
 
 	var defaultConfig = {
@@ -3030,12 +3048,12 @@
 			});
 
 			var scaleSizes = (this.options.scaleOverride) ?
-				{
-					steps: this.options.scaleSteps,
-					stepValue: this.options.scaleStepWidth,
-					min: this.options.scaleStartValue,
-					max: this.options.scaleStartValue + (this.options.scaleSteps * this.options.scaleStepWidth)
-				} :
+			{
+				steps: this.options.scaleSteps,
+				stepValue: this.options.scaleStepWidth,
+				min: this.options.scaleStartValue,
+				max: this.options.scaleStartValue + (this.options.scaleSteps * this.options.scaleStepWidth)
+			} :
 				helpers.calculateScaleRange(
 					valuesArray,
 					helpers.min([this.chart.width, this.chart.height])/2,
@@ -3061,6 +3079,8 @@
 			helpers.each(this.segments,function(segment){
 				segment.save();
 			});
+
+			this.reflow();
 			this.render();
 		},
 		reflow : function(){
@@ -3331,12 +3351,12 @@
 
 
 			var scaleSizes = (this.options.scaleOverride) ?
-				{
-					steps: this.options.scaleSteps,
-					stepValue: this.options.scaleStepWidth,
-					min: this.options.scaleStartValue,
-					max: this.options.scaleStartValue + (this.options.scaleSteps * this.options.scaleStepWidth)
-				} :
+			{
+				steps: this.options.scaleSteps,
+				stepValue: this.options.scaleStepWidth,
+				min: this.options.scaleStartValue,
+				max: this.options.scaleStartValue + (this.options.scaleSteps * this.options.scaleStepWidth)
+			} :
 				helpers.calculateScaleRange(
 					valuesArray,
 					helpers.min([this.chart.width, this.chart.height])/2,
